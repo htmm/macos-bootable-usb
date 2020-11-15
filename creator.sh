@@ -7,7 +7,7 @@ set -e
 
 # GLOBAL variables
 MACOS_VERSION="catalina" # supported: "highsierra", "mojave", "catalina". "bigsur" coming soon!
-TARGET_DISK="" # warning ... the whole disk will be formatted.
+TARGET_DISK=""           # warning ... the whole disk will be formatted.
 
 # utils
 red="\e[31m"
@@ -22,15 +22,15 @@ VERSION_STRING=""
 HTTP_CLIENT="aria2c" # recommended
 VERBOSE_MODE=true
 
-CURL_OPTION="-L -s"
-ARIA2_OPTION="--quiet=true -x 5"
-DISKUTIL_OPTION="quiet"
+CURL_OPTION="-L"
+ARIA2_OPTION="-x 5"
+DISKUTIL_OPTION=""
 
-if [[ $1 == "--verbose" ]]; then
-    VERBOSE_MODE=true
-    CURL_OPTION="-L"
-    ARIA2_OPTION="-x 5"
-    DISKUTIL_OPTION=""
+if [[ $1 == "--quiet" ]]; then
+    VERBOSE_MODE=false
+    CURL_OPTION="-L -s"
+    ARIA2_OPTION="--quiet=true -x 5"
+    DISKUTIL_OPTION="quiet"
 fi
 
 disksize=$(diskutil info $TARGET_DISK | grep "Disk Size" | awk '{ print $3 }')
