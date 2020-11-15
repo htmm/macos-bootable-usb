@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 
 # Created By Hein Thant (heinthanth)
+# Modified version of macos-guest-virtualbox.sh
 
 set -e
 
 # GLOBAL variables
 MACOS_VERSION="catalina" # supported: "highsierra", "mojave", "catalina". "bigsur" coming soon!
+TARGET_DISK="" # warning ... the whole disk will be formatted.
 
 # utils
 red="\e[31m"
@@ -18,11 +20,45 @@ OUTPUT_DIR="${MACOS_VERSION}-installer"
 CATALOG_URL=""
 VERSION_STRING=""
 HTTP_CLIENT="aria2c" # recommended
+VERBOSE_MODE=true
+
+CURL_OPTION="-L -s"
+ARIA2_OPTION="--quiet=true -x 5"
+DISKUTIL_OPTION="quiet"
+
+if [[ $1 == "--verbose" ]]; then
+    VERBOSE_MODE=true
+    CURL_OPTION="-L"
+    ARIA2_OPTION="-x 5"
+    DISKUTIL_OPTION=""
+fi
+
+disksize=$(diskutil info $TARGET_DISK | grep "Disk Size" | awk '{ print $3 }')
+
+if [ $MACOS_VERSION == "catalina" ] && (($(echo "$disksize < 10" | bc -l))); then
+    printf "[*] ${red}macOS Catalina required installation with 10GB or above.${reset}\n"
+fi
+
+printf "[*] Checking for ${orange}coreutils${reset} ...\n"
+if ! command -v gcsplit &>/dev/null; then
+    printf "[*] ${red}coreutils not installed${reset}. checking whether package manager exists ...\n"
+    if command -v "ports" &>/dev/null; then
+        printf "[*] Found MacPorts. Using MacPorts to install coreutils\n"
+        sudo port install coreutils
+    elif command -v "brew" &>/dev/null; then
+        printf "[*] Found HomeBrew. Using HomeBrew to install coreutils\n"
+        brew install coreutils
+    else
+        printf "[*] ${red}There's no package manager I know!${reset} Please install a package manager!\n"
+        printf "[*] ${orange}https://macports.org${reset} or ${orange}https://brew.sh${reset}\n"
+        exit 0
+    fi
+fi
 
 printf "[*] Checking for ${orange}aria2c${reset} ...\n"
 if ! command -v $HTTP_CLIENT &>/dev/null; then
     printf "[*] ${red}aria2 not installed${reset}. checking whether package manager exists ...\n"
-    if command -v "port" &>/dev/null; then
+    if command -v "ports" &>/dev/null; then
         printf "[*] Found MacPorts. Using MacPorts to install aria2\n"
         sudo port install aria2
     elif command -v "brew" &>/dev/null; then
@@ -46,33 +82,45 @@ elif [[ $MACOS_VERSION == "highsierra" ]]; then
 fi
 
 printf "[*] Downloading Catalog ... "
-curl -L -s -o 'sucatalog.plist' -C - "$CATALOG_URL"
+if [[ $VERBOSE_MODE == true ]]; then
+    printf "\n"
+fi
+curl $CURL_OPTION -o 'sucatalog.plist' -C - "$CATALOG_URL"
 
 if ! test -f "sucatalog.plist"; then
-    printf "[*] ${red}Something went wrong while downloading plist"
+    printf "[*] \n${red}Something went wrong while downloading plist"
 else
-    printf "${green}done${reset}\n"
+    if [[ $VERBOSE_MODE == false ]]; then
+        printf "${green}done${reset}\n"
+    fi
 fi
 
 printf "[*] Finding macOS InstallAssistant download URL ... "
+if [[ $VERBOSE_MODE == true ]]; then
+    printf "\n"
+fi
 # TODO: apple csplit, expr not working, depends on GNU coreutils
 tail -r "sucatalog.plist" | gcsplit - '/InstallAssistantAuto.smd/+1' '{*}' -f "_sucatalog_" -s
 for catalog in _sucatalog_* "error"; do
     if [[ "${catalog}" == error ]]; then
         rm -rf _sucatalog*
-        printf "${red}error${reset}\n"
+        if [[ $VERBOSE_MODE == false ]]; then
+            printf "${red}error${reset}\n"
+        fi
         printf "[*] ${red}Something went wrong. Couldn't find URL${reset}"
         exit 1
     fi
     baseURL="$(tail -n 1 "${catalog}" 2>/dev/null)"
     baseURL="$(gexpr match "${baseURL}" '.*\(http://[^<]*/\)')"
-    curl -s -L "${baseURL}InstallAssistantAuto.smd" -o "${catalog}_InstallAssistantAuto.smd"
+    curl $CURL_OPTION "${baseURL}InstallAssistantAuto.smd" -o "${catalog}_InstallAssistantAuto.smd"
     if [[ "$(cat "${catalog}_InstallAssistantAuto.smd")" =~ Beta ]]; then
         continue
     fi
     found_version="$(head -n 6 "${catalog}_InstallAssistantAuto.smd" | tail -n 1)"
     if [[ "${found_version}" == *${VERSION_STRING}* ]]; then
-        printf "${green}done${reset}\n"
+        if [[ $VERBOSE_MODE == false ]]; then
+            printf "${green}done${reset}\n"
+        fi
         printf "[*] Found download URL: ${orange}${baseURL}${reset}\n"
         rm _sucatalog*
         break
@@ -81,7 +129,9 @@ for catalog in _sucatalog_* "error"; do
 done
 if [[ $baseURL == "" ]]; then
     rm _sucatalog*
-    printf "${red}error${reset}\n"
+    if [[ $VERBOSE_MODE == false ]]; then
+        printf "${red}error${reset}\n"
+    fi
     printf "[*] ${red}Couldn't find URL${reset}"
     exit 0
 fi
@@ -89,11 +139,68 @@ fi
 printf "[*] Downloading macOS installation files ... "
 # TODO: remove line 92 after development
 baseURL="http://localhost:8000/"
+if [[ $VERBOSE_MODE == true ]]; then
+    printf "\n"
+fi
 for filename in "BaseSystem.chunklist" "InstallInfo.plist" "AppleDiagnostics.dmg" "AppleDiagnostics.chunklist" "BaseSystem.dmg" "InstallESDDmg.pkg"; do
-    if test -f "${OUTPUT_DIR}/${filename}"; then
-        aria2c --quiet=true --dir $OUTPUT_DIR --continue=true -x 5 "${baseURL}${filename}"
+    if [[ $HTTP_CLIENT == "aria2c" ]]; then
+        if test -f "${OUTPUT_DIR}/${filename}"; then
+            aria2c $ARIA2_OPTION --dir $OUTPUT_DIR --continue=true "${baseURL}${filename}"
+        else
+            aria2c $ARIA2_OPTION --dir $OUTPUT_DIR "${baseURL}${filename}"
+        fi
     else
-        aria2c --quiet=true --dir $OUTPUT_DIR -x 5 "${baseURL}${filename}"
+        curl $CURL_OPTION -o "${OUTPUT_DIR}/${filename}" -C - "${baseURL}${filename}"
     fi
 done
+if [[ $VERBOSE_MODE == false ]]; then
+    printf "${green}done${reset}\n"
+fi
+
+printf "[*] Formatting ... "
+if [[ $VERBOSE_MODE == true ]]; then
+    printf "\n"
+fi
+diskutil $DISKUTIL_OPTION eraseDisk JHFS+ ${MACOS_VERSION}-installer $TARGET_DISK
+if [[ $VERBOSE_MODE == false ]]; then
+    printf "${green}done${reset}\n"
+fi
+
+printf "[*] asking sudo passwords ... \n"
+sudo -v
+
+printf "[*] Restoring Base Image ... "
+if [[ $VERBOSE_MODE == true ]]; then
+    printf "\n"
+    sudo asr restore --source "${OUTPUT_DIR}/BaseSystem.dmg" --target "/Volumes/${MACOS_VERSION}-installer" --noprompt --erase
+else
+    sudo asr restore --source "${OUTPUT_DIR}/BaseSystem.dmg" --target "/Volumes/${MACOS_VERSION}-installer" --noprompt --erase >/dev/null
+    printf "${green}done${reset}\n"
+fi
+
+installer_path="$(ls -d '/Volumes/'*'Base System/Install'*'.app')"
+installer_path="${installer_path}/Contents/SharedSupport/"
+mkdir -p "${installer_path}"
+printf "[*] Copying Installation Packages ... "
+if [[ $VERBOSE_MODE == true ]]; then
+    printf "\n"
+fi
+for filename in "BaseSystem.chunklist" "InstallInfo.plist" "AppleDiagnostics.dmg" "AppleDiagnostics.chunklist" "BaseSystem.dmg" "InstallESDDmg.pkg"; do
+    if [[ $VERBOSE_MODE == true ]]; then
+        /bin/cp -v "${OUTPUT_DIR}/${filename}" "${installer_path}"
+    else
+        /bin/cp "${OUTPUT_DIR}/${filename}" "${installer_path}"
+    fi
+done
+if [[ $VERBOSE_MODE == false ]]; then
+    printf "${green}done${reset}\n"
+fi
+
+printf "[*] Preparing Installation Packages ... "
+mv "${installer_path}/InstallESDDmg.pkg" "${installer_path}/InstallESD.dmg"
+sed -i.bak -e "s/InstallESDDmg\.pkg/InstallESD.dmg/" -e "s/pkg\.InstallESDDmg/dmg.InstallESD/" "${installer_path}InstallInfo.plist"
+sed -i.bak2 -e "/InstallESD\.dmg/{n;N;N;N;d;}" "${installer_path}InstallInfo.plist"
+rm "${installer_path}InstallInfo.plist.bak"*
 printf "${green}done${reset}\n"
+
+printf "[*] Installation Media ${green}Ok!${reset} Just go reboot now!\n"
