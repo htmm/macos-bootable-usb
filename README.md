@@ -7,13 +7,19 @@ Thanks me later :3
 
 ## How to Use
 
-it's still in Development. Simply, just run the script. It'll ask some questions.
+it's still in beta. Simply, just edit `MACOS_VERSION` and `TARGET_DISK` variables and run the script.
+
+`TARGET_DISK` information can be found in `diskutil` > `table` > `Device`. In this example `disk3`. So, `TARGET_DISK` become `/dev/disk3`.
+
+![diskutil](screenshots/diskutil.png)
 
 ```shell script
 $ git clone https://github.com/heinthanth/macos-bootable-usb
 $ cd macos-bootable-usb
 $ ./creator.sh
 ```
+
+![running script](screenshots/run.png)
 
 ## License
 
