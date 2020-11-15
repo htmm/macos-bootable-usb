@@ -42,7 +42,7 @@ fi
 printf "[*] Checking for ${orange}coreutils${reset} ...\n"
 if ! command -v gcsplit &>/dev/null; then
     printf "[*] ${red}coreutils not installed${reset}. checking whether package manager exists ...\n"
-    if command -v "ports" &>/dev/null; then
+    if command -v "port" &>/dev/null; then
         printf "[*] Found MacPorts. Using MacPorts to install coreutils\n"
         sudo port install coreutils
     elif command -v "brew" &>/dev/null; then
@@ -58,7 +58,7 @@ fi
 printf "[*] Checking for ${orange}aria2c${reset} ...\n"
 if ! command -v $HTTP_CLIENT &>/dev/null; then
     printf "[*] ${red}aria2 not installed${reset}. checking whether package manager exists ...\n"
-    if command -v "ports" &>/dev/null; then
+    if command -v "port" &>/dev/null; then
         printf "[*] Found MacPorts. Using MacPorts to install aria2\n"
         sudo port install aria2
     elif command -v "brew" &>/dev/null; then
@@ -137,8 +137,6 @@ if [[ $baseURL == "" ]]; then
 fi
 
 printf "[*] Downloading macOS installation files ... "
-# TODO: remove line 92 after development
-baseURL="http://localhost:8000/"
 if [[ $VERBOSE_MODE == true ]]; then
     printf "\n"
 fi
