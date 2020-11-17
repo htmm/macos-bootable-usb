@@ -108,9 +108,6 @@ else
     INSTALLATION_FILES=("BaseSystem.chunklist" "InstallInfo.plist" "AppleDiagnostics.dmg" "AppleDiagnostics.chunklist" "BaseSystem.dmg" "InstallESDDmg.pkg")
 fi
 
-# TODO: REMOVE AFTER DEVELOPMENT
-BASE_URL="http://localhost:8000"
-
 OUTPUT_DIR="${MACOS_VERSION}-files"
 mkdir -p $OUTPUT_DIR
 printf "\n"
@@ -193,10 +190,23 @@ case "$response" in
 esac
 # END OF FORMAT DISK
 
-MACOS_VERSION="catalina"
-
+# CREATION INSTALLER
 if [[ $MACOS_VERSION == "bigsur" ]]; then
-    printf "Big Sur stuffs."
+    if ! sudo -n true 2>/dev/null; then
+        printf "[*] asking for sudo passwords. "
+        sudo -v
+        printf "\n"
+    fi
+    sudo installer -pkg "${OUTPUT_DIR}/InstallAssistant.pkg" -target /
+    printf "\n"
+    sudo /Applications/Install\ macOS\ Big\ Sur.app/Contents/Resources/createinstallmedia --nointeraction --volume /Volumes/"${MACOS_VERSION}-installer/"
+    if ! sudo -n true 2>/dev/null; then
+        printf "[*] asking for sudo passwords. "
+        sudo -v
+        printf "\n"
+    fi
+    sudo chown $USER "${OUTPUT_DIR}/InstallAssistant.pkg"
+    sudo chmod 755 "${OUTPUT_DIR}/InstallAssistant.pkg"
 else
     # RESTORE DISK IMAGE
     if ! sudo -n true 2>/dev/null; then
@@ -222,3 +232,4 @@ else
 fi
 
 printf "\n[*] Installation Media \e[32mOk!\e[31m Just go reboot now!\n\n"
+# END OF CREATING INSTALLER
