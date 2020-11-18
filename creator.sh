@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # MacOS bootable USB creator
 # thanks to https://github.com/myspaghetti/macos-virtualbox/ for some commands I didn't know.
 # Bash 3 sucks! macOS uses out-dated bash version 3.
@@ -8,10 +10,10 @@
 
 CATALOG_URL="https://swscan.apple.com/content/catalogs/others/index-11-10.15-10.14-10.13-10.12-10.11-10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog"
 
-printf "\n\e[33mMacOS Bootable USB creator\e[0m\n"
+printf "\n\e[33mMacOS Bootable USB creator [v1.0.1]\e[0m\n\n"
 
 # DOWNLOADING CATALOG
-printf "\n[*] Downloading sucatalog.plist ...\n"
+printf "[*] Downloading sucatalog.plist ...\n"
 curl -L --progress-bar -o "sucatalog.plist" $CATALOG_URL
 printf "\n"
 #END OF DOWNLOADING CATALOG
@@ -61,6 +63,12 @@ SELECTED_VERSION=""
 SELECTED_BUILD=""
 
 printf "\n\n"
+
+if [ ${#supported_version[@]} -eq 0 ]; then
+    printf "[*] \e[31mOops! No version available!\n\n"
+    exit 0
+fi
+
 while :; do
     count=${#supported_version[@]}
     for ((i = 0; i < $count; i++)); do
@@ -108,12 +116,18 @@ else
     INSTALLATION_FILES=("BaseSystem.chunklist" "InstallInfo.plist" "AppleDiagnostics.dmg" "AppleDiagnostics.chunklist" "BaseSystem.dmg" "InstallESDDmg.pkg")
 fi
 
+BASE_URL="http://localhost:8000"
+
 OUTPUT_DIR="${MACOS_VERSION}-files"
 mkdir -p $OUTPUT_DIR
 printf "\n"
 for filename in ${INSTALLATION_FILES[@]}; do
     printf "[*] Downloading ${filename}\n"
     curl -L --progress-bar -o "${OUTPUT_DIR}/${filename}" -C - "${BASE_URL}/${filename}"
+    if [[ $? -ne 0 ]]; then
+        printf "[*] \e[31mDownload Failed. PLEASE TRY AGAIN!\e[0m\n\n"
+        exit 1
+    fi
 done
 # END OF DOWNLOADING INSTALLATION FILES
 
@@ -125,7 +139,7 @@ printf "\n"
 
 if [ ${#external_disk[@]} -eq 0 ]; then
     printf "[*] \e[31mOops! no disk found!\n\n"
-    exit 0
+    exit 1
 fi
 
 deviceName=()
@@ -182,6 +196,9 @@ case "$response" in
     printf "\n"
     diskutil eraseDisk JHFS+ ${MACOS_VERSION}-installer $TARGET_DISK
     printf "\n"
+    if [[ $? -ne 0 ]]; then
+        printf "[*] \e[31mSomething went wrong. PLEASE CHECK and TRY AGAIN!\e[0m\n\n"
+    fi
     ;;
 *)
     printf "\n\e[31mUser cancelled. Exiting\e[0m\n\n"
@@ -195,6 +212,10 @@ if [[ $MACOS_VERSION == "bigsur" ]]; then
     if ! sudo -n true 2>/dev/null; then
         printf "[*] asking for sudo passwords. "
         sudo -v
+        if [[ $? -ne 0 ]]; then
+            printf "\n\e[31mUser cancelled. Exiting\e[0m\n\n"
+            exit 1
+        fi
         printf "\n"
     fi
     sudo installer -pkg "${OUTPUT_DIR}/InstallAssistant.pkg" -target /
@@ -203,6 +224,10 @@ if [[ $MACOS_VERSION == "bigsur" ]]; then
     if ! sudo -n true 2>/dev/null; then
         printf "[*] asking for sudo passwords. "
         sudo -v
+        if [[ $? -ne 0 ]]; then
+            printf "\n\e[31mUser cancelled. Exiting\e[0m\n\n"
+            exit 1
+        fi
         printf "\n"
     fi
     sudo chown $USER "${OUTPUT_DIR}/InstallAssistant.pkg"
@@ -212,9 +237,17 @@ else
     if ! sudo -n true 2>/dev/null; then
         printf "[*] asking for sudo passwords. "
         sudo -v
+        if [[ $? -ne 0 ]]; then
+            printf "\n\e[31mUser cancelled. Exiting\e[0m\n\n"
+            exit 1
+        fi
         printf "\n"
     fi
     sudo asr restore --source "${OUTPUT_DIR}/BaseSystem.dmg" --target "/Volumes/${MACOS_VERSION}-installer" --noprompt --erase
+    if [[ $? -ne 0 ]]; then
+        printf "\n\e[31mSomething went wrong. PLEASE TRY AGAIN!\e[0m\n\n"
+        exit 1
+    fi
     printf "\n"
 
     installer_path="$(ls -d '/Volumes/'*'Base System/Install'*'.app')"
