@@ -116,7 +116,7 @@ else
     INSTALLATION_FILES=("BaseSystem.chunklist" "InstallInfo.plist" "AppleDiagnostics.dmg" "AppleDiagnostics.chunklist" "BaseSystem.dmg" "InstallESDDmg.pkg")
 fi
 
-BASE_URL="http://localhost:8000"
+#BASE_URL="http://localhost:8000"
 
 OUTPUT_DIR="${MACOS_VERSION}-files"
 mkdir -p $OUTPUT_DIR
