@@ -26,7 +26,7 @@ Optionally, you can verify the script with this command.
 
 ``` shell script
 $ curl -LO https://github.com/heinthanth/macos-bootable-usb/releases/latest/download/SHASUM
-$ shasum creator.sh -c SHASUM
+$ shasum -c SHASUM
 ```
 
 Moreover, if you don't trust `SHASUM` file, go check with `gpg`
