@@ -39,6 +39,8 @@ it's still in beta. Simply just run the script, answer the question and go!
 
 ![Screenshot](screenshots/Screenshot.png)
 
+![Screenshot](screenshots/Screenshot2.png)
+
 `DISK SELECTION` information can be found in `diskutil` > `table` > `Device`. In this example `disk3`. So, `TARGET_DISK` become `/dev/disk3`.
 
 ![diskutil](screenshots/diskutil.png)
