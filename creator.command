@@ -131,6 +131,7 @@ fi
 #BASE_URL="http://localhost:8000"
 
 OUTPUT_DIR="/Private/tmp/Install_macOS/${MACOS_VERSION}"
+rm -rf $OUTPUT_DIR
 Sleep 1
 mkdir -p $OUTPUT_DIR
 printf "\n"
@@ -200,7 +201,10 @@ done
  fi
  Sleep 1
   Imagepath=`/usr/bin/osascript << SourceFolder
-  set SourceFolder to "/Private/tmp/Install_macOS/"  set DestinationFolder to POSIX path of (choose folder with prompt "Please select the location to save it:")  set DestinationFolder to DestinationFolder & "Install macOS " & ((current date) as text)  do shell script "mv " & quoted form of SourceFolder & space & quoted form of DestinationFolder
+  set SourceFolder to "/Private/tmp/Install_macOS/"
+  set DestinationFolder to POSIX path of (choose folder with prompt "Please select the location to save it:")
+  set DestinationFolder to DestinationFolder & "Install macOS " & ((current date) as text)
+  do shell script "mv " & quoted form of SourceFolder & space & quoted form of DestinationFolder
       SourceFolder`
 
   # Cancel is user selects Cancel
