@@ -11,16 +11,39 @@ Honestly, the main reason is I've limited Internet. I can't download the whole 8
 
 ## How to Use
 
+#### Clone the repository
+```bash
+git clone https://github.com/htmm/macos-bootable-usb.git
+cd $HOME/macos-bootable-usb
+chmod +x ./creator.command
+chmod +x ./Create_Install_Media.command
+```
+
+#### Downloading Install macOS from apple server
+```bash
+
+cd $HOME/macos-bootable-usb
+./creator.command
+```
+
+#### Creating Create Install Media bootable drive
+```bash
+
+cd $HOME/macos-bootable-usb
+./Create_Install_Media.command
+```
+
+
+
 it's still in beta. Simply just run the script, answer the question and go!
+
+![Screenshot](screenshots/Screenshot.png)
 
 `DISK SELECTION` information can be found in `diskutil` > `table` > `Device`. In this example `disk3`. So, `TARGET_DISK` become `/dev/disk3`.
 
 ![diskutil](screenshots/diskutil.png)
 
-```shell script
-$ curl -LO https://github.com/heinthanth/macos-bootable-usb/releases/latest/download/macos-booable-usb-creator.sh
-$ ./creator.sh
-```
+
 
 Optionally, you can verify the script with this command.
 
