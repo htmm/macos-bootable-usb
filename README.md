@@ -37,13 +37,39 @@ cd $HOME/macos-bootable-usb
 
 it's still in beta. Simply just run the script, answer the question and go!
 
+## View Choice 1: ⬇︎
+<details> 
+  <summary>Choice 1</summary>
+
+![Screenshot](screenshots/Screenshot-1.png)
+
+![Screenshot](screenshots/Screenshot-1-2.png)
+
+</details>
+
+
+## View Choice 24: ⬇︎
+<details> 
+  <summary>Choice 24</summary>
+
 ![Screenshot](screenshots/Screenshot.png)
 
 ![Screenshot](screenshots/Screenshot2.png)
 
+</details>
+
+
 `DISK SELECTION` information can be found in `diskutil` > `table` > `Device`. In this example `disk3`. So, `TARGET_DISK` become `/dev/disk3`.
 
+
+## View diskutil: ⬇︎
+<details> 
+  <summary>diskutil</summary>
+
 ![diskutil](screenshots/diskutil.png)
+
+</details>
+
 
 
 
