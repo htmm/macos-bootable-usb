@@ -71,23 +71,6 @@ it's still in beta. Simply just run the script, answer the question and go!
 </details>
 
 
-
-
-Optionally, you can verify the script with this command.
-
-``` shell script
-$ curl -LO https://github.com/heinthanth/macos-bootable-usb/releases/latest/download/SHASUM
-$ shasum -c SHASUM
-```
-
-Moreover, if you don't trust `SHASUM` file, go check with `gpg`
-
-```
-$ curl -LO https://github.com/heinthanth/macos-bootable-usb/releases/latest/download/SHASUM
-$ curl -LO https://github.com/heinthanth/macos-bootable-usb/releases/latest/download/SHASUM.gpg
-$ gpg --keyserver hkp://keys.gnupg.net --recv-key 46D4B29338EE5105BCA79A142E1082FBF9CB91E9
-$ gpg --verify SHASUM.gpg SHASUM
-```
 ## Thanks
 
 Thanks to -
