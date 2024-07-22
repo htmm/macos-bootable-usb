@@ -12,7 +12,7 @@ Welcome Create Install Media
 to create macOS Install drive.
 --------------------------
 You can create a bootable USB key 
-from macOS High Sierra 10.13 to macOS Sonoma 14
+from macOS High Sierra 10.13 to macOS Sequoia 15
 		
 Format your USB Drive with Disk Utility 
 in the format Mac OS Extended (Journaled) 
@@ -45,9 +45,9 @@ To continue, select the volume you want to use, then press the OK button" OK but
 	try
 		--If Continue
 		set theAction to button returned of (display dialog "
-Choose the location of your Install macOS.app" with icon 2 buttons {"Quit", "10.13 to Sonoma 14"} cancel button "Quit" default button {"10.13 to Sonoma 14"})
-		if theAction = "10.13 to Sonoma 14" then
-			--If 10.13 to Sonoma 14
+Choose the location of your Install macOS.app" with icon 2 buttons {"Quit", "10.13 to Sequoia 15"} cancel button "Quit" default button {"10.13 to Sequoia 15"})
+		if theAction = "10.13 to Sequoia 15" then
+			--If 10.13 to Sequoia 15
 			
 			set InstallOSX to choose file of type {"XLSX", "APPL"} default location (path to applications folder) with prompt "Choose your Install macOS.app"
 			set OSXInstaller to POSIX path of InstallOSX
