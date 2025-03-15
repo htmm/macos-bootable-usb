@@ -202,18 +202,15 @@ done
  rm -rf "${OUTPUT_DIR}/AppleDiagnostics.chunklist"
  fi
  Sleep 1
-  Imagepath=`/usr/bin/osascript << SourceFolder
-  set SourceFolder to "/Private/tmp/Install_macOS/"
-  set DestinationFolder to POSIX path of (choose folder with prompt "Please select the location to save it:")
-  set DestinationFolder to DestinationFolder & "Install macOS " & ((current date) as text)
-  do shell script "mv " & quoted form of SourceFolder & space & quoted form of DestinationFolder
-      SourceFolder`
-
-  # Cancel is user selects Cancel
-  if [ ! "$Imagepath" ] ; then
-    osascript -e 'display notification "Program closing" with title "'"$apptitle"'" subtitle "User cancelled"'
-    exit 0
-  fi
+ Imagepath=`/usr/bin/osascript << SourceFolder
+ set SourceFolder to "/Private/tmp/Install_macOS/"
+ set DestinationFolder to POSIX path of (path to home folder from user domain)
+ display dialog "Install_macOS will be saved in /HOME directory in 1 minute" with icon 2 buttons {"Save"} default button {"Save"} giving up after 60
+ set DestinationFolder to DestinationFolder & "Install-macOS " & ((current date) as text)
+ do shell script "mv " & quoted form of SourceFolder & space & quoted form of DestinationFolder
+ delay 2
+ do shell script "open -R /$HOME/Install-macOS*"
+ SourceFolder`
 
  echo " "
  printf "\n\e[33mBackUp --> for macOS $MACOS_VERSION Done!\e[0m"
