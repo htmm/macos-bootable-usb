@@ -8,14 +8,14 @@ set -e
 # but I tried to implement using pure Bash 3 without GNU coreutils.
 # - heinthanth ( Hein Thant Maung Maung )
 
-CATALOG_URL="https://swscan.apple.com/content/catalogs/others/index-15seed-15-14-13-12-10.16-10.15-10.14-10.13-10.12-10.11-10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog"
+CATALOG_URL="https://swscan.apple.com/content/catalogs/others/index-26seed-26-15-14-13-12-10.16-10.15-10.14-10.13-10.12-10.11-10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog"
 
 printf "\n\e[33mDownload Install macOS [v1.0.1]\e[0m\n\n"
 
 printf '\e[8;40;82t'
 
 # Download Install macOS
-# RELEASE AND BETA_Sequoia
+# RELEASE AND BETA_Tahoe
 
 # DOWNLOADING CATALOG
 CATALOG="/Private/tmp/sucatalog.plist"
@@ -103,7 +103,9 @@ MAJOR_VERSION=$(echo $SELECTED_BUILD_INFO | cut -d, -f1 | cut -d. -f1,2)
 BASE_URL=$(echo $SELECTED_BUILD_INFO | cut -d, -f3)
 MACOS_VERSION=""
 
-if [[ "$MAJOR_VERSION" == "15."* ]]; then
+if [[ "$MAJOR_VERSION" == "26."* ]]; then
+    MACOS_VERSION="Tahoe"
+elif [[ "$MAJOR_VERSION" == "15."* ]]; then
     MACOS_VERSION="Sequoia"
 elif [[ "$MAJOR_VERSION" == "14."* ]]; then
     MACOS_VERSION="Sonoma"
@@ -124,12 +126,13 @@ fi
 
 # DOWNLOADING_INSTALLATION_FILES
 INSTALLATION_FILES=()
-if [[ $MACOS_VERSION == "Sequoia" ]] || [[ $MACOS_VERSION == "Sonoma" ]] || [[ "$MACOS_VERSION" == "Ventura" ]] || [[ "$MACOS_VERSION" == "Monterey" ]] || [[ "$MACOS_VERSION" == "BigSur" ]]; then
+# DOWNLOADING_INSTALLATION_FILES
+INSTALLATION_FILES=()
+if [[ $MACOS_VERSION == "Tahoe" ]] || [[ $MACOS_VERSION == "Sequoia" ]] || [[ $MACOS_VERSION == "Sonoma" ]] || [[ "$MACOS_VERSION" == "Ventura" ]] || [[ "$MACOS_VERSION" == "Monterey" ]] || [[ "$MACOS_VERSION" == "BigSur" ]]; then
     INSTALLATION_FILES=("InstallAssistant.pkg")
 else
     INSTALLATION_FILES=("BaseSystem.chunklist" "InstallInfo.plist" "AppleDiagnostics.dmg" "AppleDiagnostics.chunklist" "BaseSystem.dmg" "InstallESDDmg.pkg")
 fi
-
 #BASE_URL="http://localhost:8000"
 
 OUTPUT_DIR="/Private/tmp/Install_macOS/${MACOS_VERSION}"
