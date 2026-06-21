@@ -1,6 +1,6 @@
 #!/usr/bin/osascript
 #
-# Create Install Media, Copyright (c) 2024 chris1111. All Right Reserved.
+# Create Install Media, Copyright (c) 2024, 2026 chris1111. All Right Reserved.
 # Credit: Apple
 # Version "1.0"
 # AppleScript Code
@@ -12,7 +12,7 @@ Welcome Create Install Media
 to create macOS Install drive.
 --------------------------
 You can create a bootable USB key 
-from macOS High Sierra 10.13 to macOS Sequoia 15
+from macOS High Sierra 10.13 to macOS Tahoe 26
 		
 Format your USB Drive with Disk Utility 
 in the format Mac OS Extended (Journaled) 
@@ -45,9 +45,9 @@ To continue, select the volume you want to use, then press the OK button" OK but
 	try
 		--If Continue
 		set theAction to button returned of (display dialog "
-Choose the location of your Install macOS.app" with icon 2 buttons {"Quit", "10.13 to Sequoia 15"} cancel button "Quit" default button {"10.13 to Sequoia 15"})
-		if theAction = "10.13 to Sequoia 15" then
-			--If 10.13 to Sequoia 15
+Choose the location of your Install macOS.app" with icon 2 buttons {"Quit", "10.13 to Tahoe 26"} cancel button "Quit" default button {"10.13 to Tahoe 26"})
+		if theAction = "10.13 to Tahoe 26" then
+			--If 10.13 to Tahoe 26
 			
 			set InstallOSX to choose file of type {"XLSX", "APPL"} default location (path to applications folder) with prompt "Choose your Install macOS.app"
 			set OSXInstaller to POSIX path of InstallOSX
